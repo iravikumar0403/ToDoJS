@@ -81,8 +81,10 @@ function checkCompletedTasks(){
     var completedHeading = document.getElementById('completedHeading')
     if (completedTask.childElementCount > 1 ){
         completedHeading.style.display = ''
+        infoMsg.innerHTML = "<i>Wohoo!! No more task for today</i>"
     }else{
         completedHeading.style.display = 'none'
+        infoMsg.innerHTML = "<i>Your tasks will appear here.<br>Start planning your day.</i>"
     }
 }
 
