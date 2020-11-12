@@ -5,9 +5,6 @@ var completedTask = document.getElementById('completed')
 var submitBtn = document.getElementById("submitBtn")
 var taskList = document.getElementById('task-list')
 
-
-
-
 submitBtn.addEventListener('click', function(){
     addTask()
     inputField.value = ''
@@ -34,10 +31,7 @@ function addTask(){
         check.className = 'fas fa-check check'
         task.appendChild(check)
         check.onclick = function(e){
-            taskCompletedId = e.target.parentElement.id
-            taskCompleted = document.getElementById(taskCompletedId)
-            completedTask.appendChild(taskCompleted)
-            checkTasks()
+            markAsCompleted(e.target.parentElement)
         }
 
         var txt = document.createElement('p')
@@ -45,22 +39,57 @@ function addTask(){
         task.appendChild(txt)
 
         var deleteIcon = document.createElement('i')
-        deleteIcon.className = 'fas fa-trash-alt remove-icon'
+        deleteIcon.className = "fas fa-times remove-icon"
         task.appendChild(deleteIcon)
         deleteIcon.onclick = function(e){
             delTaskid = e.target.parentElement.id
             delTask = document.getElementById(delTaskid)
             delTask.remove()
+            checkIncompleteTasks()
+            checkCompletedTasks()
         }
         incompleteTask.appendChild(task)
     }
 }
 
-function checkTasks(){
+function checkIncompleteTasks(){
     if(incompleteTask.childElementCount === 0){
         infoMsg.style.display = ''
     }else{
         infoMsg.style.display = 'none'
     }            
 
+}
+
+function markAsCompleted(task){
+    if (task.classList.contains('completed')){
+        task.classList.remove('completed')
+        incompleteTask.appendChild(task)
+        childElems = task.children
+        childElems[2].className = "fas fa-times remove-icon"
+    }else{
+        task.classList.add('completed')
+        completedTask.appendChild(task)
+        childElems = task.children
+        childElems[2].className = "far fa-trash-alt remove-icon"
+    }
+    checkIncompleteTasks()
+    checkCompletedTasks();
+}
+checkCompletedTasks()
+function checkCompletedTasks(){
+    var completedHeading = document.getElementById('completedHeading')
+    if (completedTask.childElementCount > 1 ){
+        completedHeading.style.display = ''
+    }else{
+        completedHeading.style.display = 'none'
+    }
+}
+
+var deleteAll = document.getElementById('deleteAll')
+deleteAll.onclick = function(){
+    while(completedTask.childElementCount > 1){
+        completedTask.lastChild.remove()
+    }
+    checkCompletedTasks();
 }

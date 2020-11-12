@@ -33,6 +33,19 @@ body{
 #completed p{
     text-decoration: line-through;
 }
+#completedHeading{
+    display: flex;
+    justify-content: space-between;
+    flex-direction: row;
+    border-bottom: 1px solid #8a8a8a;
+    position: relative;
+}
+#completedHeading>h3{
+    margin-top: 20px;
+    padding-left: 20px;
+    padding-bottom: 10px;
+    color: #3fe599;
+}
 .task{
     display: flex;
     width: 100%;
@@ -49,11 +62,11 @@ body{
 }
 .task>p{
     padding: 20px;
-    
 }
 .remove-icon{
     position: absolute;
     right: 0;
+    bottom: 55%;
     transform: translateY(100%);
     padding: 0 20px;
     color: #8a8a8a;
@@ -97,9 +110,13 @@ body{
     letter-spacing: 0.5px;
 }
 
+.completed .check{
+    color:  #3fe599
+}
+
 @media (min-width: 1024px){
     body{
-        background-color: rgb(189, 189, 189);
+        background-color: #eeeeee;
         height: 100vh;
         display: flex;
         justify-content: center;
