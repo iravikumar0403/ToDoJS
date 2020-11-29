@@ -1,148 +1,167 @@
-var inputField = document.getElementById("inputField")
-var infoMsg = document.getElementById("info")
-var incompleteTask = document.getElementById('notCompleted')
-var completedTask = document.getElementById('completed')
-var submitBtn = document.getElementById("submitBtn")
-var taskList = document.getElementById('task-list')
-
-submitBtn.addEventListener('click', function(){
-    addTask()
-    inputField.value = ''
-})
-
-inputField.onkeyup = function(e){
+var incompleteTasks = document.getElementById('notCompleted')
+var completedTasks = document.getElementById('completed')
+var inputField = document.getElementById('inputField')
+var addTaskBtn = document.getElementById('addTaskBtn')
+addTaskBtn.addEventListener('click', addTask)
+inputField.addEventListener('keyup', function(e){
     if (e.key === 'Enter'){
         addTask()
-        inputField.value = ''
     }
+})
+
+window.onload = renderView
+
+function renderView(){
+
+    var data = localStorage.getItem('taskList')
+    taskList = JSON.parse(data)
+    for (var i=0;i<taskList.length;i++){
+        createTaskCard(taskList[i])
+    }
+    checkIncompleteTask()
+    checkCompletedTask()
 }
 
 function addTask(){
-    if(inputField.value ===""){
-        alert('Task cannot be empty')
+    var currTask = {
+        'id': Date.now(),
+        'msg': inputField.value,
+        'isCompleted': false
+    }
+    inputField.value = ''
+    var data = localStorage.getItem('taskList')
+    if (data === null){
+        var taskList = [currTask]
+        localStorage.setItem('taskList', JSON.stringify(taskList))
     }else{
-        infoMsg.style.display = 'none'
+        var taskList = JSON.parse(data)
+        taskList.push(currTask)
+        localStorage.setItem('taskList', JSON.stringify(taskList))
+    }
+    createTaskCard(currTask)
+    checkIncompleteTask()
+    checkCompletedTask()
+}
 
-        var task =  document.createElement('div')
-        task.className = 'task'
-        task.id = Date.now()
-
-        var taskContainer = document.createElement('div')
-        taskContainer.className = 'taskContainer'
-        
-
-        var check = document.createElement('i')
-        check.className = 'fas fa-check check'
-        taskContainer.appendChild(check)
-        check.onclick = function(e){
-            markAsCompleted(e.target.parentElement.parentElement)
-            // checkCompletedTasks()
-        }
-
-        var txt = document.createElement('p')
-        txt.innerHTML = inputField.value
-        taskContainer.appendChild(txt)
-
-        var editIcon = document.createElement('i')
-        editIcon.className = 'fas fa-edit edit-icon'
-        taskContainer.appendChild(editIcon)
-        editIcon.onclick = function(e){
-            editInput.value = e.target.parentElement.innerText;
-            e.target.parentElement.style.display = 'none'
-            var toBeEditedTask = e.target.parentElement.parentElement
-            toBeEditedTask.lastChild.style.display = 'flex'
-            toBeEditedTask.lastChild.firstChild.focus()
-        }
-
-        var deleteIcon = document.createElement('i')
-        deleteIcon.className = "fas fa-times remove-icon"
-        taskContainer.appendChild(deleteIcon)
-        deleteIcon.onclick = function(e){
-            delTaskid = e.target.parentElement.parentElement.id
-            delTask = document.getElementById(delTaskid)
-            delTask.remove()
-            checkIncompleteTasks()
-            checkCompletedTasks()
-        }
-        task.appendChild(taskContainer)
-
-        var editContainer = document.createElement('div')
-        editContainer.className = 'editContainer'
-
-        var editInput = document.createElement('input')
-        editInput.className = 'editInput'
-        editInput.type = 'text'
-        editContainer.appendChild(editInput)
-
-        var updateBtn = document.createElement('button')
-        updateBtn.className = 'updateBtn'
-        updateBtn.innerHTML = 'Update'
-        updateBtn.addEventListener('click', function(e){
-            editTask(e)
-        })
-        editInput.addEventListener('keyup', function(e){
-            if( e.key ==='Enter'){
-                editTask(e)
-            }
-        })
-        editContainer.appendChild(updateBtn)
-        
-        task.appendChild(editContainer)
-        incompleteTask.appendChild(task)
-
-        function editTask(e){
-            var toBeEditedTask = e.target.parentElement.parentElement
-            var taskContainer = toBeEditedTask.children[0]
-            taskContainer.children[1].innerHTML = editInput.value
-            toBeEditedTask.firstChild.style.display = 'flex'
-            toBeEditedTask.lastChild.style.display = 'none'
-        }
+function createTaskCard(currTask){
+    if (currTask.isCompleted){
+        createCompleteTaskCard(currTask)
+    }else{
+        createIncompleteTaskCard(currTask)
     }
 }
 
-function checkIncompleteTasks(){
-    if(incompleteTask.childElementCount === 0){
-        infoMsg.style.display = ''
-    }else{
-        infoMsg.style.display = 'none'
-    }            
+function createIncompleteTaskCard(currTask){
+    var task = document.createElement('div')
+    task.className = 'task'
+    task.id = currTask.id
 
+    var taskContainer = document.createElement('div')
+    taskContainer.className = 'taskContainer'
+
+    var checkBox = document.createElement('i')
+    checkBox.className = 'fas fa-check check'
+
+    var todomsg = document.createElement('p')
+    todomsg.innerHTML = currTask.msg
+
+    var editIcon = document.createElement('i')
+    editIcon.className = 'fas fa-edit edit-icon'
+    editIcon.addEventListener('click', editTask)
+
+    var removeIcon = document.createElement('i')
+    removeIcon.className = 'fas fa-trash remove-icon'
+    removeIcon.addEventListener('click', deleteTask)
+
+    taskContainer.appendChild(checkBox)
+    taskContainer.appendChild(todomsg)
+    taskContainer.appendChild(editIcon)
+    taskContainer.appendChild(removeIcon)
+
+    var editContainer = document.createElement('div')
+    editContainer.className = 'editContainer'
+
+    var editInput = document.createElement('input')
+    editInput.className = 'editInput'
+    editInput.type = 'text'
+    editInput.addEventListener('keyup', function(e){
+        if (e.key === 'Enter'){
+            updateTask(e)
+        }
+    })
+
+    var updateBtn = document.createElement('button')
+    updateBtn.innerHTML = 'update'
+    updateBtn.className = 'updateBtn'
+    updateBtn.addEventListener('click', updateTask)
+
+    editContainer.appendChild(editInput)
+    editContainer.appendChild(updateBtn)
+
+    task.appendChild(taskContainer)
+    task.appendChild(editContainer)
+
+    incompleteTasks.appendChild(task)
 }
 
-function markAsCompleted(task){
-    if (task.firstChild.classList.contains('completed')){
-        task.firstChild.classList.remove('completed')
-        incompleteTask.appendChild(task)
-        childElems = task.firstChild.children
-        childElems[2].className = 'fas fa-edit edit-icon'
-        childElems[3].className = "fas fa-times remove-icon"
-    }else{
-        task.firstChild.classList.add('completed')
-        completedTask.appendChild(task)
-        childElems = task.firstChild.children
-        childElems[2].className = ''
-        childElems[3].className = "far fa-trash-alt remove-icon"
-    }
-    checkIncompleteTasks()
-    checkCompletedTasks();
-}
-
-checkCompletedTasks()
-function checkCompletedTasks(){
+function checkCompletedTask(){
     var completedHeading = document.getElementById('completedHeading')
-    if (completedTask.childElementCount > 1 ){
-        completedHeading.style.display = 'block'
-        infoMsg.innerHTML = "<i>Wohoo!! No more task for today</i>"
-    }else{
+    if (completedTasks.childElementCount < 2){
         completedHeading.style.display = 'none'
-        infoMsg.innerHTML = "<i>Your tasks will appear here.<br>Start planning your day.</i>"
+    }else{
+        completedHeading.style.display = 'block'
     }
 }
 
-var deleteAll = document.getElementById('deleteAll')
-deleteAll.onclick = function(){
-    while(completedTask.childElementCount > 1){
-        completedTask.lastChild.remove()
+function checkIncompleteTask(){
+    var infoMsg = document.getElementById('info')
+    if (incompleteTasks.childElementCount > 0){
+        infoMsg.style.display = 'none'
+    }else{
+        infoMsg.style.display = 'block'
     }
-    checkCompletedTasks();
+}
+
+function deleteTask(e){
+    var taskToDelete = e.target.parentElement.parentElement
+    var id = taskToDelete.id
+    var data = localStorage.getItem('taskList')
+    allTask = JSON.parse(data)
+    for (var i=0;i<allTask.length;i++){
+        if (allTask[i].id == id){
+            allTask.splice(i, 1)
+        }
+    }
+    localStorage.setItem('taskList', JSON.stringify(allTask))
+    taskToDelete.remove()
+    checkIncompleteTask()
+    checkCompletedTask()
+}
+
+function editTask(e){
+    var taskToEdit = e.target.parentElement.parentElement
+    taskToEdit.firstChild.style.display = 'none'
+    taskToEdit.lastChild.style.display = 'flex'
+    msg = taskToEdit.firstChild.children[1].innerHTML
+    editInput = taskToEdit.lastChild.firstChild
+    editInput.value = msg
+    editInput.focus()
+}
+
+function updateTask(e){
+    var taskToUpdate = e.target.parentElement.parentElement
+    taskToUpdate.firstChild.style.display = 'flex'
+    taskToUpdate.lastChild.style.display = 'none'
+    editInput = taskToUpdate.lastChild.firstChild
+    
+    var id = taskToUpdate.id
+    var data = localStorage.getItem('taskList')
+    allTask = JSON.parse(data)
+    for (var i=0;i<allTask.length;i++){
+        if (allTask[i].id == id){
+            allTask[i].msg = editInput.value
+        }
+    }
+    localStorage.setItem('taskList', JSON.stringify(allTask))
+    taskToUpdate.firstChild.children[1].innerHTML = editInput.value
 }
