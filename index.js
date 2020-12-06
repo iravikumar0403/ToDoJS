@@ -14,12 +14,14 @@ window.onload = renderView
 function renderView(){
 
     var data = localStorage.getItem('taskList')
-    taskList = JSON.parse(data)
+    if (data == null){
+        taskList = []
+    }else{
+        taskList = JSON.parse(data)
+    }
     for (var i=0;i<taskList.length;i++){
         createTaskCard(taskList[i])
     }
-    checkIncompleteTask()
-    checkCompletedTask()
 }
 
 function addTask(){
