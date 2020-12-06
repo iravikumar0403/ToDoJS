@@ -10,12 +10,12 @@ inputField.addEventListener('keyup', function(e){
 })
 
 window.onload = renderView
-// todo: Make completed task fucntion
+
 function renderView(){
     incompleteTasks.innerHTML = ''
     completedTasks.innerHTML = `<div id='completedHeading'>
     <h3>Completed Task</h3>
-    <i id='deleteAll' class="far fa-trash-alt remove-icon">All</i>
+    <i id='deleteAll' onclick = "deleteAll()" class="far fa-trash-alt remove-icon">All</i>
 </div>`
     var data = localStorage.getItem('taskList')
     if (data == null){
@@ -27,6 +27,22 @@ function renderView(){
         createTaskCard(taskList[i])
     }
     checkIncompleteTask()
+    checkCompletedTask()
+}
+
+function deleteAll(e){
+    var data = localStorage.getItem('taskList')
+    var taskList = JSON.parse(data)
+    for (var i=0;i<taskList.length;i++){
+        console.log(taskList.length)
+        console.log(taskList[i])
+        if(taskList[i].isCompleted){
+            taskList.splice(i,1)
+            localStorage.setItem('taskList', JSON.stringify(taskList))
+            i--;
+        }
+    }
+    renderView()
     checkCompletedTask()
 }
 
@@ -44,8 +60,6 @@ function addTask(){
     }else{
         taskList = JSON.parse(data)
     }
-    console.log(taskList)
-    console.log(currTask)
     taskList.push(currTask)
     localStorage.setItem('taskList', JSON.stringify(taskList))
     createTaskCard(currTask)
