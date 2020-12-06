@@ -10,9 +10,13 @@ inputField.addEventListener('keyup', function(e){
 })
 
 window.onload = renderView
-
+// todo: Make completed task fucntion
 function renderView(){
-
+    incompleteTasks.innerHTML = ''
+    completedTasks.innerHTML = `<div id='completedHeading'>
+    <h3>Completed Task</h3>
+    <i id='deleteAll' class="far fa-trash-alt remove-icon">All</i>
+</div>`
     var data = localStorage.getItem('taskList')
     if (data == null){
         taskList = []
@@ -22,6 +26,8 @@ function renderView(){
     for (var i=0;i<taskList.length;i++){
         createTaskCard(taskList[i])
     }
+    checkIncompleteTask()
+    checkCompletedTask()
 }
 
 function addTask(){
@@ -32,14 +38,16 @@ function addTask(){
     }
     inputField.value = ''
     var data = localStorage.getItem('taskList')
-    if (data === null){
-        var taskList = [currTask]
-        localStorage.setItem('taskList', JSON.stringify(taskList))
+    var taskList;
+    if (data == null){
+        taskList = []
     }else{
-        var taskList = JSON.parse(data)
-        taskList.push(currTask)
-        localStorage.setItem('taskList', JSON.stringify(taskList))
+        taskList = JSON.parse(data)
     }
+    console.log(taskList)
+    console.log(currTask)
+    taskList.push(currTask)
+    localStorage.setItem('taskList', JSON.stringify(taskList))
     createTaskCard(currTask)
     checkIncompleteTask()
     checkCompletedTask()
@@ -63,6 +71,7 @@ function createIncompleteTaskCard(currTask){
 
     var checkBox = document.createElement('i')
     checkBox.className = 'fas fa-check check'
+    checkBox.addEventListener('click', markAsCompleted)
 
     var todomsg = document.createElement('p')
     todomsg.innerHTML = currTask.msg
@@ -104,6 +113,63 @@ function createIncompleteTaskCard(currTask){
     task.appendChild(editContainer)
 
     incompleteTasks.appendChild(task)
+}
+
+function createCompleteTaskCard(currTask){
+    var task = document.createElement('div')
+    task.className = 'task'
+    task.id = currTask.id
+
+    var taskContainer = document.createElement('div')
+    taskContainer.className = 'taskContainer'
+
+    var checkBox = document.createElement('i')
+    checkBox.className = 'fas fa-check check'
+    checkBox.addEventListener('click', markAsCompleted)
+    checkBox.style.color = "#3fe599"
+
+    var todomsg = document.createElement('p')
+    todomsg.innerHTML = currTask.msg
+    todomsg.style.textDecoration = 'line-through'
+
+    var editIcon = document.createElement('i')
+    editIcon.className = 'fas fa-edit edit-icon'
+    editIcon.addEventListener('click', editTask)
+    editIcon.style.display = 'none'
+
+    var removeIcon = document.createElement('i')
+    removeIcon.className = 'fas fa-trash remove-icon'
+    removeIcon.addEventListener('click', deleteTask)
+
+    taskContainer.appendChild(checkBox)
+    taskContainer.appendChild(todomsg)
+    taskContainer.appendChild(editIcon)
+    taskContainer.appendChild(removeIcon)
+
+    var editContainer = document.createElement('div')
+    editContainer.className = 'editContainer'
+
+    var editInput = document.createElement('input')
+    editInput.className = 'editInput'
+    editInput.type = 'text'
+    editInput.addEventListener('keyup', function(e){
+        if (e.key === 'Enter'){
+            updateTask(e)
+        }
+    })
+
+    var updateBtn = document.createElement('button')
+    updateBtn.innerHTML = 'update'
+    updateBtn.className = 'updateBtn'
+    updateBtn.addEventListener('click', updateTask)
+
+    editContainer.appendChild(editInput)
+    editContainer.appendChild(updateBtn)
+
+    task.appendChild(taskContainer)
+    task.appendChild(editContainer)
+
+    completedTasks.appendChild(task)
 }
 
 function checkCompletedTask(){
@@ -166,4 +232,22 @@ function updateTask(e){
     }
     localStorage.setItem('taskList', JSON.stringify(allTask))
     taskToUpdate.firstChild.children[1].innerHTML = editInput.value
+}
+
+function markAsCompleted(e){
+    var task = e.target.parentElement.parentElement
+    var id = task.id
+    var data = localStorage.getItem('taskList')
+    allTask = JSON.parse(data)
+    for (var i=0;i<allTask.length;i++){
+        if (allTask[i].id == id){
+            if( allTask[i].isCompleted == true){
+                allTask[i].isCompleted = false
+            }else{
+                allTask[i].isCompleted = true
+            }
+        }
+    }
+    localStorage.setItem('taskList', JSON.stringify(allTask))
+    renderView()
 }
