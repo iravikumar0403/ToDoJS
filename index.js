@@ -34,8 +34,6 @@ function deleteAll(e){
     var data = localStorage.getItem('taskList')
     var taskList = JSON.parse(data)
     for (var i=0;i<taskList.length;i++){
-        console.log(taskList.length)
-        console.log(taskList[i])
         if(taskList[i].isCompleted){
             taskList.splice(i,1)
             localStorage.setItem('taskList', JSON.stringify(taskList))
